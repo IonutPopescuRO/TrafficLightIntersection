@@ -1,0 +1,20 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="work.ionut.trafficlights.MainActivity">
+    <item
+        android:id="@+id/christmass"
+        android:orderInCategory="98"
+        android:title="Christmass Mode"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/halt"
+        android:orderInCategory="99"
+        android:title="sudo halt"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/author"
+        android:orderInCategory="100"
+        android:title="Ionuț Popescu"
+        app:showAsAction="never" />
+</menu>
