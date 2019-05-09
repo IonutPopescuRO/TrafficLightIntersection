@@ -9,7 +9,6 @@ import android.content.Context;
 import android.util.Log;
 
 import org.json.JSONArray;
-import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,7 +16,7 @@ import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.util.UUID;
 
-public class BluetoothConnectionService {
+class BluetoothConnectionService {
     private static final String TAG = "BluetoothConnectionServ";
 
     private static final String appName = "Semafoare";
@@ -200,8 +199,8 @@ public class BluetoothConnectionService {
         Log.d(TAG, "startClient: Started.");
 
         //initprogress dialog
-        mProgressDialog = ProgressDialog.show(mContext,"Connecting Bluetooth"
-                ,"Please Wait...",true);
+        mProgressDialog = ProgressDialog.show(mContext,"Conectare Bluetooth"
+                ,"Te rog așteaptă...",true);
 
         mConnectThread = new ConnectThread(device, uuid);
         mConnectThread.start();
@@ -258,26 +257,29 @@ public class BluetoothConnectionService {
                     try {
                         JSONArray obj = new JSONArray(incomingMessage);
                         Log.d("My App", obj.toString());
-                        MainActivity.bluetoothUpdate(obj);
+                        if(obj.getString(0).equals("resume"))
+                            MainActivity.bluetoothResume(obj);
+                        else MainActivity.bluetoothUpdate(obj);
                     } catch (Throwable e) {
                         Log.w("app", "Error: "+e);
                     }
 
                 } catch (IOException e) {
                     Log.e(TAG, "write: Error reading Input Stream. " + e.getMessage());
+                    MainActivity.showBluetoothBtn();
                     break;
                 }
             }
         }
 
-        //Call this from the main activity to send data to the remote device
-        public void write(byte[] bytes) {
+        void write(byte[] bytes) {
             String text = new String(bytes, Charset.defaultCharset());
             Log.d(TAG, "write: Writing to outputstream: " + text);
             try {
                 mmOutStream.write(bytes);
             } catch (IOException e) {
-                Log.e(TAG, "write: Error writing to output stream. " + e.getMessage() );
+                Log.e(TAG, "write: Error writing to output stream. " + e.getMessage());
+                MainActivity.showBluetoothBtn();
             }
         }
 
@@ -285,7 +287,7 @@ public class BluetoothConnectionService {
         public void cancel() {
             try {
                 mmSocket.close();
-            } catch (IOException e) { }
+            } catch (IOException ignored) { }
         }
     }
 

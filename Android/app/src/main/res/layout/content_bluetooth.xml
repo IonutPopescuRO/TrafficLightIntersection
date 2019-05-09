@@ -16,14 +16,14 @@
         android:layout_margin="5dp"
         android:background="@color/colorPrimaryDark"
         android:textColor="#fff"
-        android:text="Porneste" />
+        android:text="Pornește" />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/button_disablebt"
         android:onClick="off"
-        android:text="Opreste"
+        android:text="Oprește"
         android:layout_margin="5dp"
         android:background="@color/colorPrimaryDark"
         android:textColor="#fff"
@@ -34,7 +34,7 @@
         android:layout_height="wrap_content"
         android:id="@+id/button_scanbt"
         android:onClick="deviceList"
-        android:text="Scaneaza"
+        android:text="Scanează"
         android:layout_margin="5dp"
         android:background="@color/colorPrimaryDark"
         android:textColor="#fff"

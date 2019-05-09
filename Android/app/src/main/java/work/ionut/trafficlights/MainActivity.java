@@ -3,10 +3,8 @@ package work.ionut.trafficlights;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
-import android.content.res.AssetManager;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
@@ -26,33 +24,38 @@ import android.widget.Switch;
 
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Iterator;
 import java.util.Objects;
 import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity {
 
     static Boolean status = false;
+    static Boolean christmass_mode = false;
     static final boolean[] checked = new boolean[]{true, true, true, true};
 
     static Handler handler=null;
+    static int x=0;
+    static int y=1;
 
     static Boolean off = false;
     static Boolean check = false;
-    private static ImageView[] lights;
-    private Switch[] switches;
+    static ImageView[] lights;
+    static Switch[] switches;
+    static FloatingActionButton fab;
+    static FloatingActionButton bluetooth_btn;
+    static EditText green_red;
+    static EditText yellow;
 
-    public static int[] light_status = new int[]{0, 0, 0, 0};
+    static int[] light_status = new int[]{0, 0, 0, 0};
 
     BluetoothConnectionService mBluetoothConnection;
     private static final UUID uuid =
             UUID.fromString("94f39d29-7d6d-437d-973b-fba39e49d4ee");
 
     public BluetoothAdapter BTAdapter = BluetoothAdapter.getDefaultAdapter();
+    public static Boolean bluetoothError=false;
+    public static Boolean bluetoothDisconnect=false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,10 +74,13 @@ public class MainActivity extends AppCompatActivity {
 
         Button update = findViewById(R.id.update);
 
-        final EditText green_red = findViewById(R.id.green_red);
-        final EditText yellow = findViewById(R.id.yellow);
+        green_red = findViewById(R.id.green_red);
+        yellow = findViewById(R.id.yellow);
+        fab = findViewById(R.id.fab);
 
-        final FloatingActionButton fab = findViewById(R.id.fab);
+        bluetooth_btn = findViewById(R.id.bluetooth_btn);
+        bluetooth_btn.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#1464c1")));
+
         final ImageView light1 = findViewById(R.id.light1);
         final ImageView light2 = findViewById(R.id.light2);
         final ImageView light3 = findViewById(R.id.light3);
@@ -93,7 +99,6 @@ public class MainActivity extends AppCompatActivity {
 
         fab.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#0b6623")));
         fab.setImageResource(R.drawable.ic_play_arrow_black_24dp);
-
 
         if(status)
         {
@@ -242,6 +247,34 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        final Handler handler2 = new Handler();
+        final Runnable runnable2 = new Runnable() {
+            @Override
+            public void run() {
+                handler2.postDelayed(this, 1000);
+                if(bluetoothError)
+                {
+                    bluetoothError=false;
+                    if(!bluetoothDisconnect)
+                        mBluetoothConnection.startClient(device, uuid);
+                }
+                if(bluetoothDisconnect)
+                {
+                    bluetoothDisconnect=false;
+                    bluetooth_btn.setVisibility(View.VISIBLE);
+                }
+            }
+        };
+        handler2.postDelayed(runnable2, 1000);
+
+        bluetooth_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mBluetoothConnection.startClient(device, uuid);
+                bluetooth_btn.setVisibility(View.GONE);
+            }
+        });
+
         if (!mBluetoothAdapter.isEnabled()) {
             Intent enableBluetooth = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBluetooth, 0);
@@ -255,19 +288,17 @@ public class MainActivity extends AppCompatActivity {
             for(int i=0;i<4;i++)
                 if(!checked[i])
                     return;
-            Log.w("app", "NOT NULL");
             off=false;
             handler=null;
         } else
         {
-            Log.w("app", "NULL");
             off = true;
             handler =  new Handler();
             handler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
                     for(int i=0;i<4;i++)
-                        if(!checked[i])
+                        if(!checked[i] && !christmass_mode)
                         {
                             if(!check)
                                 setLight(i, 0);
@@ -283,15 +314,72 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public static void christmassMode()
+    {
+        Log.d("app", "res christmassMode");
+
+        final Handler christmass_handler = new Handler();
+        final Runnable christmass_runnable = new Runnable() {
+            @Override
+            public void run() {
+                if (christmass_mode)
+                    christmass_handler.postDelayed(this, 100);
+                setLight(x, y);
+                y++;
+                if(y>4) {
+                    y=1; x++;
+                }
+                if(x>3) {
+                    x=0; y=1;
+                }
+            }
+        };
+        christmass_handler.postDelayed(christmass_runnable, 100);
+    }
+
     public static void bluetoothUpdate(JSONArray arr){
         for (int i=0; i < arr.length(); i++) {
             try {
                 light_status[i]=arr.getInt(i);
-                if(checked[i])
+                if(checked[i] && !christmass_mode)
                     setLight(i, light_status[i]);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    public static void bluetoothResume(JSONArray arr) throws JSONException {
+        christmass_mode=arr.getBoolean(1);
+        if(christmass_mode) {
+            for(int i=0;i<4;i++)
+                setLight(i, 0);
+            try {
+                Thread.sleep(2000);
+                // call some methods here
+
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            christmassMode();
+        }
+        green_red.setText(arr.getJSONArray(4).getString(0));
+        yellow.setText(arr.getJSONArray(4).getString(1));
+
+        if(arr.getBoolean(5)) {
+            fab.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#FF2400")));
+            fab.setImageResource(R.drawable.ic_stop_black_24dp);
+
+            status=true;
+
+            JSONArray yellow2 = arr.getJSONArray(3);
+            for(int i=0;i<4;i++) {
+                switches[i].setClickable(true);
+                switches[i].setChecked(yellow2.getBoolean(i));
+            }
+
+            JSONArray light_status2 = arr.getJSONArray(2);
+            bluetoothUpdate(light_status2);
         }
     }
 
@@ -315,6 +403,11 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public static void showBluetoothBtn()
+    {
+        bluetoothError=true;
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
@@ -327,21 +420,45 @@ public class MainActivity extends AppCompatActivity {
 
         if (id == R.id.christmass)
         {
+            christmass_mode=!christmass_mode;
+            if(christmass_mode) {
+                for(int i=0;i<4;i++)
+                    setLight(i, 0);
+                christmassMode();
+            } else {
+                for(int i=0;i<4;i++)
+                    setLight(i, 0);
+            }
             mBluetoothConnection.write("christmass");
             return true;
         } else if (id == R.id.halt)
         {
             mBluetoothConnection.write("halt");
+            System.exit(0);
+            return true;
+        } else if (id == R.id.reboot)
+        {
+            mBluetoothConnection.write("reboot");
+            System.exit(0);
+            return true;
+        } else if (id == R.id.disconnect)
+        {
+            mBluetoothConnection.write("disconnect");
+            bluetoothDisconnect=true;
             return true;
         }else if (id == R.id.author)
             return true;
-
         return super.onOptionsItemSelected(item);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        mBluetoothConnection.write("disconnect");
+        //mBluetoothConnection.write("disconnect");
+    }
+
+    @Override
+    public void onBackPressed() {
+        moveTaskToBack(true);
     }
 }

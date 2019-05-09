@@ -1,12 +1,10 @@
 package work.ionut.trafficlights;
 
-import android.bluetooth.BluetoothSocket;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
 import java.util.Set;
 import java.util.ArrayList;
-import java.util.UUID;
 
 import android.support.v7.widget.Toolbar;
 import android.view.View;
@@ -49,9 +47,9 @@ public class BluetoothActivity extends AppCompatActivity {
         if (!BTAdapter.isEnabled()) {
             Intent turnOn = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(turnOn, 0);
-            Toast.makeText(getApplicationContext(), "Turned on",Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), "Bluetooth activat.",Toast.LENGTH_SHORT).show();
         } else {
-            Toast.makeText(getApplicationContext(), "Already on", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), "Bluetooth-ul este deja activ.", Toast.LENGTH_SHORT).show();
         }
         scanbt.setVisibility(View.VISIBLE);
         lv.setVisibility(View.VISIBLE);
@@ -59,7 +57,7 @@ public class BluetoothActivity extends AppCompatActivity {
 
     public void off(View v){
         BTAdapter.disable();
-        Toast.makeText(getApplicationContext(), "Turned off" ,Toast.LENGTH_SHORT).show();
+        Toast.makeText(getApplicationContext(), "Bluetooth pornit." ,Toast.LENGTH_SHORT).show();
         scanbt.setVisibility(View.INVISIBLE);
         lv.setVisibility(View.GONE);
     }
@@ -69,7 +67,7 @@ public class BluetoothActivity extends AppCompatActivity {
         pairedDevices = BTAdapter.getBondedDevices();
 
         if (pairedDevices.size() < 1) {
-            Toast.makeText(getApplicationContext(), "No paired devices found", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), "Nu s-au găsit dispozitive împerecheate.", Toast.LENGTH_SHORT).show();
         } else {
             for (BluetoothDevice bt : pairedDevices) deviceList.add(bt.getName() + " " + bt.getAddress());
             Toast.makeText(getApplicationContext(), "Showing paired devices", Toast.LENGTH_SHORT).show();
