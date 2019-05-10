@@ -261,6 +261,7 @@ public class MainActivity extends AppCompatActivity {
                 if(bluetoothDisconnect)
                 {
                     bluetoothDisconnect=false;
+					bluetoothError=false;
                     bluetooth_btn.setVisibility(View.VISIBLE);
                 }
             }
