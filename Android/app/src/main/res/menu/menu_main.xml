@@ -3,24 +3,29 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="work.ionut.trafficlights.MainActivity">
     <item
-        android:id="@+id/christmass"
-        android:orderInCategory="96"
-        android:title="Christmass Mode"
+        android:id="@+id/christmas"
+        android:orderInCategory="95"
+        android:title="Christmas Mode"
         app:showAsAction="never" />
     <item
-        android:id="@+id/disconnect"
-        android:orderInCategory="97"
-        android:title="Deconectare"
+        android:id="@+id/christmas2"
+        android:orderInCategory="96"
+        android:title="Christmas Mode 2"
         app:showAsAction="never" />
     <item
         android:id="@+id/halt"
-        android:orderInCategory="98"
+        android:orderInCategory="97"
         android:title="sudo halt"
         app:showAsAction="never" />
     <item
         android:id="@+id/reboot"
-        android:orderInCategory="99"
+        android:orderInCategory="98"
         android:title="sudo reboot"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/disconnect"
+        android:orderInCategory="99"
+        android:title="Deconectare Bluetooth"
         app:showAsAction="never" />
     <item
         android:id="@+id/author"

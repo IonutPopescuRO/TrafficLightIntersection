@@ -31,7 +31,7 @@ import java.util.UUID;
 public class MainActivity extends AppCompatActivity {
 
     static Boolean status = false;
-    static Boolean christmass_mode = false;
+    static Boolean christmas_mode = false;
     static final boolean[] checked = new boolean[]{true, true, true, true};
 
     static Handler handler=null;
@@ -208,9 +208,9 @@ public class MainActivity extends AppCompatActivity {
                         switches[i].setClickable(true);
 
                     mBluetoothConnection.write("start");
-                    if(christmass_mode)
+                    if(christmas_mode)
                     {
-                        christmass_mode=!christmass_mode;
+                        christmas_mode=false;
                         for(int i=0;i<4;i++)
                             setLight(i, 0);
                     }
@@ -232,9 +232,9 @@ public class MainActivity extends AppCompatActivity {
                         checkHandler();
 
                     mBluetoothConnection.write("stop");
-                    if(christmass_mode)
+                    if(christmas_mode)
                     {
-                        christmass_mode=!christmass_mode;
+                        christmas_mode=false;
                         for(int i=0;i<4;i++)
                             setLight(i, 0);
                     }
@@ -312,7 +312,7 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void run() {
                     for(int i=0;i<4;i++)
-                        if(!checked[i] && !christmass_mode)
+                        if(!checked[i] && !christmas_mode)
                         {
                             if(!check)
                                 setLight(i, 0);
@@ -328,16 +328,16 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public static void christmassMode()
+    public static void christmasMode()
     {
-        Log.d("app", "res christmassMode");
+        Log.d("app", "res christmasMode");
 
-        final Handler christmass_handler = new Handler();
-        final Runnable christmass_runnable = new Runnable() {
+        final Handler christmas_handler = new Handler();
+        final Runnable christmas_runnable = new Runnable() {
             @Override
             public void run() {
-                if (christmass_mode)
-                    christmass_handler.postDelayed(this, 100);
+                if (christmas_mode)
+                    christmas_handler.postDelayed(this, 100);
                 setLight(x, y);
                 y++;
                 if(y>4) {
@@ -348,14 +348,14 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         };
-        christmass_handler.postDelayed(christmass_runnable, 100);
+        christmas_handler.postDelayed(christmas_runnable, 100);
     }
 
     public static void bluetoothUpdate(JSONArray arr){
         for (int i=0; i < arr.length(); i++) {
             try {
                 light_status[i]=arr.getInt(i);
-                if(checked[i] && !christmass_mode)
+                if(checked[i] && !christmas_mode)
                     setLight(i, light_status[i]);
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -364,8 +364,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public static void bluetoothResume(JSONArray arr) throws JSONException {
-        christmass_mode=arr.getBoolean(1);
-        if(christmass_mode) {
+        christmas_mode=arr.getBoolean(1);
+        if(christmas_mode) {
             for(int i=0;i<4;i++)
                 setLight(i, 0);
             try {
@@ -375,7 +375,7 @@ public class MainActivity extends AppCompatActivity {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            christmassMode();
+            christmasMode();
         }
         green_red.setText(arr.getJSONArray(4).getString(0));
         yellow.setText(arr.getJSONArray(4).getString(1));
@@ -432,31 +432,31 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        if (id == R.id.christmass)
+        if (id == R.id.christmas)
         {
-            christmass_mode=!christmass_mode;
-            if(christmass_mode) {
+            christmas_mode=!christmas_mode;
+            if(christmas_mode) {
                 for(int i=0;i<4;i++)
                     setLight(i, 0);
-                christmassMode();
+                christmasMode();
             } else {
                 for(int i=0;i<4;i++)
                     setLight(i, 0);
             }
-            mBluetoothConnection.write("christmass 1");
+            mBluetoothConnection.write("christmas 1");
             return true;
-        } else if (id == R.id.christmass2)
+        } else if (id == R.id.christmas2)
         {
-            christmass_mode=!christmass_mode;
-            if(christmass_mode) {
+            christmas_mode=!christmas_mode;
+            if(christmas_mode) {
                 for(int i=0;i<4;i++)
                     setLight(i, 0);
-                christmassMode();
+                christmasMode();
             } else {
                 for(int i=0;i<4;i++)
                     setLight(i, 0);
             }
-            mBluetoothConnection.write("christmass 2");
+            mBluetoothConnection.write("christmas 2");
             return true;
         } else if (id == R.id.halt)
         {
