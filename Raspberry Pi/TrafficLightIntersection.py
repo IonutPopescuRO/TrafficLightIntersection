@@ -20,9 +20,9 @@ client_sock = None
 for row in gpios:
 	for elem in row:
 		GPIO.setup(elem, GPIO.OUT)
-		GPIO.output(elem, GPIO.LOW)
+		GPIO.output(elem, 0)
 		
-GPIO.output(gpios[3][2], GPIO.HIGH)
+GPIO.output(gpios[3][2], 1)
 
 wait = 0.001
 christmas_timer = 0.05
@@ -32,11 +32,11 @@ def intermittent():
 		if(not christmas):
 			for i in range(0, 4):
 				if(not status[i]):
-					GPIO.output(gpios[i][1], GPIO.HIGH)
+					GPIO.output(gpios[i][1], 1)
 			time.sleep(1)
 			for i in range(0, 4):
 				if(not status[i]):
-					GPIO.output(gpios[i][1], GPIO.LOW)
+					GPIO.output(gpios[i][1], 0)
 			time.sleep(1)
 
 def gpio_update():
@@ -44,39 +44,39 @@ def gpio_update():
 		for i in range(0, 4):
 			for j in range(0, 3):
 				if(status[i]):
-					GPIO.output(gpios[i][j], GPIO.LOW)
+					GPIO.output(gpios[i][j], 0)
 		
 		for i in range(0, 4):
 			if(status[i] and light_status[i]):
-				GPIO.output(gpios[i][light_status[i]-1], GPIO.HIGH)
+				GPIO.output(gpios[i][light_status[i]-1], 1)
 
 def christmas_mode():
 	while christmas:
 		last = gpios[0][0]
 		for row in gpios:
 			for elem in row:
-				GPIO.output(last, GPIO.LOW)
+				GPIO.output(last, 0)
 				time.sleep(christmas_timer)
-				GPIO.output(elem, GPIO.HIGH)
+				GPIO.output(elem, 1)
 				time.sleep(christmas_timer)
 				last=elem
-			GPIO.output(last, GPIO.LOW)
+			GPIO.output(last, 0)
 			if(not christmas):
 				break;
 				
 def christmas_mode2():
 	while christmas:
 		for i in range(0, 4):
-			GPIO.output(gpios[i][0], GPIO.HIGH)
-			GPIO.output(gpios[i][1], GPIO.LOW)
-			GPIO.output(gpios[i][2], GPIO.HIGH)
+			GPIO.output(gpios[i][0], 1)
+			GPIO.output(gpios[i][1], 0)
+			GPIO.output(gpios[i][2], 1)
 		if(not christmas):
 			break;
 		time.sleep(christmas_timer)
 		for i in range(0, 4):
-			GPIO.output(gpios[i][0], GPIO.LOW)
-			GPIO.output(gpios[i][1], GPIO.HIGH)
-			GPIO.output(gpios[i][2], GPIO.LOW)
+			GPIO.output(gpios[i][0], 0)
+			GPIO.output(gpios[i][1], 1)
+			GPIO.output(gpios[i][2], 0)
 		if(not christmas):
 			break;
 		time.sleep(christmas_timer)
@@ -111,7 +111,7 @@ def Convert(string):
 def stopAll():
 	for row in gpios:
 		for elem in row:
-			GPIO.output(elem, GPIO.LOW)
+			GPIO.output(elem, 0)
 
 server_sock=BluetoothSocket( RFCOMM )
 server_sock.bind(("",PORT_ANY))
@@ -133,8 +133,8 @@ try:
 			connection = True
 			print("Accepted connection from ", client_info)
 			if(not lights):
-				GPIO.output(gpios[3][2], GPIO.LOW)
-				GPIO.output(gpios[3][0], GPIO.HIGH)
+				GPIO.output(gpios[3][2], 0)
+				GPIO.output(gpios[3][0], 1)
 			if(connection):
 				current_status = ["resume", christmas, light_status, status, timer, lights]
 				client_sock.send("%s" % json.dumps(current_status))
@@ -145,8 +145,8 @@ try:
 			if (data[0] == "disconnect"):
 				print("Client wanted to disconnect")
 				if(not lights):
-					GPIO.output(gpios[3][2], GPIO.HIGH)
-					GPIO.output(gpios[3][0], GPIO.LOW)
+					GPIO.output(gpios[3][2], 1)
+					GPIO.output(gpios[3][0], 0)
 				client_sock.close()
 				connection = False
 			elif (data[0] == "start"):
@@ -158,7 +158,7 @@ try:
 					p1 = threading.Thread(target=traffic_light)
 					p1.start()
 			elif (data[0] == "update"):
-				timer = [int(data[1]), int(data[2])]
+				timer = [float(data[1]), float(data[2])]
 			elif (data[0] == "stop"):
 				if(christmas):
 					christmas=False
@@ -175,7 +175,7 @@ try:
 							yellow = False
 					status[int(data[1])] = False
 					for elem in gpios[int(data[1])]:
-						GPIO.output(elem, GPIO.LOW)
+						GPIO.output(elem, 0)
 					if(yellow):
 						p2 = threading.Thread(target=intermittent)
 						p2.start()
@@ -196,14 +196,14 @@ try:
 					christmas=False
 				stopAll()
 				for i in range(0, 4):
-					GPIO.output(gpios[i][2], GPIO.HIGH)
+					GPIO.output(gpios[i][2], 1)
 				os.system("sudo shutdown -h now")
 			elif (data[0] == "reboot"):
 				if(christmas):
 					christmas=False
 				stopAll()
 				for i in range(0, 4):
-					GPIO.output(gpios[i][1], GPIO.HIGH)
+					GPIO.output(gpios[i][1], 1)
 				os.system("sudo reboot now")
 		except IOError as e:
 			#print(e)
