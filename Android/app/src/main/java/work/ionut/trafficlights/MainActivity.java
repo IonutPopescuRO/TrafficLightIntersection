@@ -208,6 +208,13 @@ public class MainActivity extends AppCompatActivity {
                         switches[i].setClickable(true);
 
                     mBluetoothConnection.write("start");
+                    if(christmass_mode)
+                    {
+                        christmass_mode=!christmass_mode;
+                        for(int i=0;i<4;i++)
+                            setLight(i, 0);
+                    }
+
                     Snackbar.make(view, "Semafoarele au fost pornite.", Snackbar.LENGTH_LONG)
                             .setAction("Action", null).show();
                 } else {
@@ -225,6 +232,12 @@ public class MainActivity extends AppCompatActivity {
                         checkHandler();
 
                     mBluetoothConnection.write("stop");
+                    if(christmass_mode)
+                    {
+                        christmass_mode=!christmass_mode;
+                        for(int i=0;i<4;i++)
+                            setLight(i, 0);
+                    }
 
                     Snackbar.make(view, "Semafoarele au fost oprite.", Snackbar.LENGTH_LONG)
                             .setAction("Action", null).show();
@@ -261,7 +274,7 @@ public class MainActivity extends AppCompatActivity {
                 if(bluetoothDisconnect)
                 {
                     bluetoothDisconnect=false;
-					bluetoothError=false;
+                    bluetoothError=false;
                     bluetooth_btn.setVisibility(View.VISIBLE);
                 }
             }
@@ -430,7 +443,20 @@ public class MainActivity extends AppCompatActivity {
                 for(int i=0;i<4;i++)
                     setLight(i, 0);
             }
-            mBluetoothConnection.write("christmass");
+            mBluetoothConnection.write("christmass 1");
+            return true;
+        } else if (id == R.id.christmass2)
+        {
+            christmass_mode=!christmass_mode;
+            if(christmass_mode) {
+                for(int i=0;i<4;i++)
+                    setLight(i, 0);
+                christmassMode();
+            } else {
+                for(int i=0;i<4;i++)
+                    setLight(i, 0);
+            }
+            mBluetoothConnection.write("christmass 2");
             return true;
         } else if (id == R.id.halt)
         {

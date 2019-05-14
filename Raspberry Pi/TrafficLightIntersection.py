@@ -14,7 +14,7 @@ light_status = [0, 0, 0, 0]
 status = [True, True, True, True]
 timer = [6, 2]
 connection = False
-christmass = False
+christmas = False
 client_sock = None
 
 for row in gpios:
@@ -25,11 +25,11 @@ for row in gpios:
 GPIO.output(gpios[3][2], GPIO.HIGH)
 
 wait = 0.001
-christmass_timer = 0.05
+christmas_timer = 0.05
 
 def intermittent():
 	while(not status[0] or not status[1] or not status[2] or not status[3]):
-		if(not christmass):
+		if(not christmas):
 			for i in range(0, 4):
 				if(not status[i]):
 					GPIO.output(gpios[i][1], GPIO.HIGH)
@@ -40,7 +40,7 @@ def intermittent():
 			time.sleep(1)
 
 def gpio_update():
-	if(not christmass):
+	if(not christmas):
 		for i in range(0, 4):
 			for j in range(0, 3):
 				if(status[i]):
@@ -50,19 +50,36 @@ def gpio_update():
 			if(status[i] and light_status[i]):
 				GPIO.output(gpios[i][light_status[i]-1], GPIO.HIGH)
 
-def christmass_mode():
-	while christmass:
+def christmas_mode():
+	while christmas:
 		last = gpios[0][0]
 		for row in gpios:
 			for elem in row:
 				GPIO.output(last, GPIO.LOW)
-				time.sleep(christmass_timer)
+				time.sleep(christmas_timer)
 				GPIO.output(elem, GPIO.HIGH)
-				time.sleep(christmass_timer)
+				time.sleep(christmas_timer)
 				last=elem
 			GPIO.output(last, GPIO.LOW)
-			if(not christmass):
+			if(not christmas):
 				break;
+				
+def christmas_mode2():
+	while christmas:
+		for i in range(0, 4):
+			GPIO.output(gpios[i][0], GPIO.HIGH)
+			GPIO.output(gpios[i][1], GPIO.LOW)
+			GPIO.output(gpios[i][2], GPIO.HIGH)
+		if(not christmas):
+			break;
+		time.sleep(christmas_timer)
+		for i in range(0, 4):
+			GPIO.output(gpios[i][0], GPIO.LOW)
+			GPIO.output(gpios[i][1], GPIO.HIGH)
+			GPIO.output(gpios[i][2], GPIO.LOW)
+		if(not christmas):
+			break;
+		time.sleep(christmas_timer)
 
 def traffic_light():
     global light_status
@@ -119,7 +136,7 @@ try:
 				GPIO.output(gpios[3][2], GPIO.LOW)
 				GPIO.output(gpios[3][0], GPIO.HIGH)
 			if(connection):
-				current_status = ["resume", christmass, light_status, status, timer, lights]
+				current_status = ["resume", christmas, light_status, status, timer, lights]
 				client_sock.send("%s" % json.dumps(current_status))
 		try:
 			data = client_sock.recv(1024)
@@ -133,6 +150,8 @@ try:
 				client_sock.close()
 				connection = False
 			elif (data[0] == "start"):
+				if(christmas):
+					christmas=False
 				time.sleep(wait)
 				if(not lights):
 					lights=True
@@ -141,6 +160,8 @@ try:
 			elif (data[0] == "update"):
 				timer = [int(data[1]), int(data[2])]
 			elif (data[0] == "stop"):
+				if(christmas):
+					christmas=False
 				lights=False
 				status = [True, True, True, True]
 				stopAll()
@@ -158,21 +179,28 @@ try:
 					if(yellow):
 						p2 = threading.Thread(target=intermittent)
 						p2.start()
-			elif (data[0] == "christmass"):
-				if(not christmass):
-					christmass=True
+			elif (data[0] == "christmas"):
+				if(not christmas):
+					christmas=True
 					stopAll()
-					p3 = threading.Thread(target=christmass_mode)
+					if(data[1]=="1"):
+						p3 = threading.Thread(target=christmas_mode)
+					else:
+						p3 = threading.Thread(target=christmas_mode2)
 					p3.start()
 				else:
-					christmass=False
+					christmas=False
 					stopAll()
 			elif (data[0] == "halt"):
+				if(christmas):
+					christmas=False
 				stopAll()
 				for i in range(0, 4):
 					GPIO.output(gpios[i][2], GPIO.HIGH)
 				os.system("sudo shutdown -h now")
 			elif (data[0] == "reboot"):
+				if(christmas):
+					christmas=False
 				stopAll()
 				for i in range(0, 4):
 					GPIO.output(gpios[i][1], GPIO.HIGH)
