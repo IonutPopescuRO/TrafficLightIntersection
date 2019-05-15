@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
@@ -473,8 +474,10 @@ public class MainActivity extends AppCompatActivity {
             mBluetoothConnection.write("disconnect");
             bluetoothDisconnect=true;
             return true;
-        }else if (id == R.id.author)
+        }else if (id == R.id.author) {
+            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.ionut.work/")));
             return true;
+        }
         return super.onOptionsItemSelected(item);
     }
 
